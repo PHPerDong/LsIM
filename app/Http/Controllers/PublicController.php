@@ -18,6 +18,8 @@ class PublicController extends Controller
 	  	   		unset($post['code']);
 	  	   		if (Auth::guard('web')->attempt($post, boolval($request->post('remember', '')))) {
 	  	   			$user = Auth::user();
+                    $user->status = 'online';
+                    $user->save();
                 	return json_encode(['code'=>0,'msg'=>'登录成功','data'=>$user]);
             	}
             	return json_encode(['code'=>1,'msg'=>'账户或密码输入不正确']);
@@ -29,9 +31,16 @@ class PublicController extends Controller
 	  	   }
 	  	   
 	  }
+
+	  public function logout(){
+          $user = Auth::user();
+          $user->status = 'offline';
+          $user->save();
+          auth()->logout();
+          return redirect()->route('login');
+      }
 	  
-	  
-	  
+
 	  public function register(Request $request){
 	  	   
 	  	   $data['username'] = $request->get('username',null);

@@ -12,7 +12,7 @@
 */
 Route::get('register','PublicController@register')->name('register');
 Route::match(['get', 'post'], 'login', 'PublicController@login')->name('login');
-
+Route::any('logout', 'PublicController@logout')->name('logout');
 
 //Route::get('login','PublicController@login')->name('login');
 
@@ -20,6 +20,7 @@ Route::match(['get', 'post'], 'login', 'PublicController@login')->name('login');
 
 Route::group(['middleware' => ['user.auth']], function () {
 	Route::get('/', 'IndexController@index')->name('home');
+    Route::get('/userinfo', 'UserController@userInfo')->name('userinfo');
 });
 
 
