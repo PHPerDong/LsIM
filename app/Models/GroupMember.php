@@ -15,6 +15,10 @@ class GroupMember extends Model
         return $this->belongsTo(User::class,'user_id','id');
     }
 
+    public function group(){
+        return $this->belongsTo(Group::class,'group_id','id');
+    }
+
 
 
 

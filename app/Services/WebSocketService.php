@@ -1,9 +1,12 @@
 <?php
 namespace App\Services;
 use App\Models\Friend;
+use App\Models\GroupMember;
 use Hhxsv5\LaravelS\Swoole\WebSocketHandlerInterface;
 use DB;
 use Illuminate\Support\Facades\Auth;
+use Hhxsv5\LaravelS\Swoole\Task\Task;
+use App\Task\BatchSendTask;
 /**
  * @see https://wiki.swoole.com/wiki/page/400.html
  */
@@ -69,6 +72,31 @@ class WebSocketService implements WebSocketHandlerInterface
                     $this->sendData($server,$info->data->to->id,$data,true);
 
                 } elseif($info->data->to->type == "group"){
+
+                    $data = [
+                        'username' => $info->data->mine->username,
+                        'avatar' => $info->data->mine->avatar,
+                        'id' => $info->data->to->id,
+                        'type' => $info->data->to->type,
+                        'content' => $info->data->mine->content,
+                        'cid' => 0,
+                        'mine'=> false,//要通过判断是否是我自己发的
+                        'fromid' => $info->data->mine->id,
+                        'timestamp' => time()*1000
+                    ];
+
+                    //投递Task
+                    $task = new BatchSendTask($data);
+                    $ret = Task::deliver($task);
+                    //判断是否投递成功
+
+                    /*$group_members = GroupMember::where('group_id',$info->data->to->id)->get();
+                    foreach ($group_members as $v) {
+                        if ($v->user_id == $info->data->mine->id) {
+                            continue;
+                        }
+                        $this->sendData($server,$v->user_id,$data,true);
+                    }*/
 
                 }
                 break;

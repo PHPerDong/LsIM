@@ -16,7 +16,7 @@ class Group extends Model
     }
 
     public function groupFrineds(){
-        return $this->belongsTo(GroupMember::class,'group_id','id');
+        return $this->hasMany(GroupMember::class,'group_id','id');
     }
 
 

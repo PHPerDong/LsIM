@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
+use App\Models\GroupMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -18,9 +20,8 @@ class UserController extends Controller
         }
 
         $user_list = $user->friendGroup;
-        $group_list = $user->groups;
+        //$group_list = $user->groups;
         $friends = [];
-        $groups = [];
         foreach ($user_list as $k=>$v) {
             $friends[$k] = [
                 'groupname'=>$v->groupname,
@@ -37,12 +38,13 @@ class UserController extends Controller
                 ];
             }
         }
-
-        foreach ($group_list as $k => $v) {
+        $groups = [];
+        $group_id = GroupMember::where('user_id',$user->id)->get();
+        foreach ($group_id as $k => $v) {
             $groups[] = [
-                'groupname'=>$v->groupname,
-                'avatar'=>$v->avatar,
-                'id'=>$v->id
+                'groupname'=>$v->group->groupname,
+                'avatar'=>$v->group->avatar,
+                'id'=>$v->group->id
             ];
         }
 
@@ -56,6 +58,42 @@ class UserController extends Controller
             ],
             "friend"    => $friends,
             "group"     => $groups
+        ];
+
+        return response()->json(['code'=>0,'msg'=>'列表获取成功','data'=>$data])->header('Content-Type', 'text/html; charset=UTF-8');
+
+
+    }
+
+
+    public function groupFriends(Request $request){
+
+        $group_id = $request->get('id',null);
+        $group = Group::where('id',$group_id)->first();
+        if (empty($group->id)) {
+            return response()->json(['code'=>0,'msg'=>'该群不存在'])->header('Content-Type', 'text/html; charset=UTF-8');
+        }
+        $user = Auth::user();
+        $group_members = $group->groupFrineds;
+        $members = [];
+        foreach ($group_members as $k => $v) {
+            $members[] = [
+                'username'=>$v->user->username,
+                'id'=>$v->user->id,
+                'avatar'=>$v->user->avatar,
+                'sign'=>''
+            ];
+        }
+
+        $data = [
+            'owner'=>[
+                'username'=>$user->username,
+                'id'=>$user->id,
+                'avatar'=>$user->avatar,
+                'sign'=>''
+            ],
+            'members'=>count($members),
+            'list'=>$members
         ];
 
         return response()->json(['code'=>0,'msg'=>'列表获取成功','data'=>$data])->header('Content-Type', 'text/html; charset=UTF-8');

@@ -6,6 +6,7 @@
     <title>IM</title>
 
     <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../layui/contextMenu.css">
     <style>
         html{background-color: #333;}
     </style>
@@ -14,20 +15,27 @@
 
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="../layui/layui.js"></script>
+<script src="../layui/contextMenu.js"></script>
+{{--<script src="../layui/contextmenu.js"></script>--}}
 <script>
 
     var socket;
     var ping;
+    //var contextmenu = layui.contextmenu;
     function sendMessage(socket, data){
         var readyState = socket.readyState;
         console.log("连接状态码："+readyState);
         socket.send(data)
     }
-    layui.use('element', function(){
-        var element = layui.element;
+
+    layui.config({
+        base: '../layui/' //扩展 JS 所在目录
+    }).extend({
+        menu: 'menu'
     });
 
-    layui.use('layim', function(layim){
+
+    layui.use(['layim','menu'], function(layim){
 
         //演示自动回复
         var autoReplay = [
@@ -69,7 +77,7 @@
 
             //查看群员接口
             ,members: {
-                url: 'json/getMembers.json'
+                url: 'get_group_members'
                 ,data: {}
             }
 
@@ -110,6 +118,9 @@
             ,chatLog: layui.cache.dir + 'css/modules/layim/html/chatLog.html' //聊天记录页面地址，若不开启，剔除该项即可
 
         });
+
+
+
 
         //建立websocket连接
         socket = new WebSocket('ws://www.larim.com:9501');
@@ -207,6 +218,7 @@
         //监听layim建立就绪
         layim.on('ready', function(res){
 
+            layui.menu.init(); //更新右键点击事件
             //console.log(res.mine);
 
             layim.msgbox(5); //模拟消息盒子有新消息，实际使用时，一般是动态获得
@@ -247,6 +259,44 @@
               });
 
             }, 3000);*/
+
+
+            /*$(".layim-list-friend >li > ul > li").menu({
+                target: function (ele) { // 当前元素
+                    ele.css('background', 'rgba(0,0,0,.05)').siblings().css('background', '#ffffff');
+                    console.log(ele);
+                },
+                menu: [{
+                    text: "新增",
+                    callback: function (target,ele) {
+                        console.log(target);
+                        layer.msg(ele.find('span').text());
+                    }
+                }, {
+                    text: "复制",
+                    callback: function (target,ele) {
+                        console.log(target);
+                        layer.msg(ele.find('span').text());
+                    }
+                }, {
+                    text: "粘贴",
+                    callback: function (target,ele) {
+                        console.log(target);
+                        layer.msg(ele.find('span').text());
+                    }
+                }, {
+                    text: "删除",
+                    callback: function (target,ele) {
+                        console.log(target);
+                        layer.msg(ele.find('span').text());
+                    }
+                }
+                ]
+            });*/
+
+
+
+
         });
 
         //监听发送消息
